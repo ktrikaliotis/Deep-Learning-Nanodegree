@@ -46,20 +46,40 @@ def get_data_loaders(
     # HINT: resize the image to 256 first, then crop them to 224, then add the
     # appropriate transforms for that step
     data_transforms = {
-        "train": transforms.Compose(
-            # YOUR CODE HERE
-        ),
-        "valid": transforms.Compose(
-            # YOUR CODE HERE
-        ),
-        "test": transforms.Compose(
-            # YOUR CODE HERE
-        ),
+        "train": transforms.Compose([
+            transforms.RandomResizedCrop(224),
+            # Augmentation
+            transforms.RandomHorizontalFlip(p=0.2),
+            transforms.RandomVerticalFlip(p=0.2),
+            transforms.RandomChoice([
+                    transforms.ColorJitter(hue=0.15),
+                    transforms.ColorJitter(contrast=0.15),
+                    transforms.ColorJitter(brightness=0.15),
+                    transforms.ColorJitter(saturation=0.15)                    
+                ]),
+            transforms.RandomGrayscale(p=0.1),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)                        
+        ]),
+        "valid": transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        ]),
+        "test": transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean, std)
+        
+        ]),
     }
 
     # Create train and validation datasets
     train_data = datasets.ImageFolder(
         base_path / "train",
+        transform = data_transforms['train']
         # YOUR CODE HERE: add the appropriate transform that you defined in
         # the data_transforms dictionary
     )
@@ -67,6 +87,7 @@ def get_data_loaders(
     # from the same folder, but we apply the transforms for validation
     valid_data = datasets.ImageFolder(
         base_path / "train",
+        transform = data_transforms['valid']
         # YOUR CODE HERE: add the appropriate transform that you defined in
         # the data_transforms dictionary
     )
@@ -85,7 +106,7 @@ def get_data_loaders(
 
     # define samplers for obtaining training and validation batches
     train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
-    valid_sampler  = # YOUR CODE HERE
+    valid_sampler  = torch.utils.data.SubsetRandomSampler(valid_idx)# YOUR CODE HERE
 
     # prepare data loaders
     data_loaders["train"] = torch.utils.data.DataLoader(
@@ -95,12 +116,17 @@ def get_data_loaders(
         num_workers=num_workers,
     )
     data_loaders["valid"] = torch.utils.data.DataLoader(
+        valid_data,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers
         # YOUR CODE HERE
     )
 
     # Now create the test data loader
     test_data = datasets.ImageFolder(
         base_path / "test",
+        transform = data_transforms['test']
         # YOUR CODE HERE (add the test transform)
     )
 
@@ -112,55 +138,60 @@ def get_data_loaders(
 
     data_loaders["test"] = torch.utils.data.DataLoader(
         # YOUR CODE HERE (remember to add shuffle=False as well)
+        test_data,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers
+        # YOUR CODE HERE
     )
 
     return data_loaders
 
 
-def visualize_one_batch(data_loaders, max_n: int = 5):
-    """
-    Visualize one batch of data.
+# def visualize_one_batch(data_loaders, max_n: int = 5):
+#     """
+#     Visualize one batch of data.
 
-    :param data_loaders: dictionary containing data loaders
-    :param max_n: maximum number of images to show
-    :return: None
-    """
+#     :param data_loaders: dictionary containing data loaders
+#     :param max_n: maximum number of images to show
+#     :return: None
+#     """
 
-    # YOUR CODE HERE:
-    # obtain one batch of training images
-    # First obtain an iterator from the train dataloader
-    dataiter  = # YOUR CODE HERE
-    # Then call the .next() method on the iterator you just
-    # obtained
-    images, labels  = # YOUR CODE HERE
+#     # YOUR CODE HERE:
+#     # obtain one batch of training images
+#     # First obtain an iterator from the train dataloader
+#     dataiter  = # YOUR CODE HERE
+#     # Then call the .next() method on the iterator you just
+#     # obtained
+#     images, labels  = # YOUR CODE HERE
 
-    # Undo the normalization (for visualization purposes)
-    mean, std = compute_mean_and_std()
-    invTrans = transforms.Compose(
-        [
-            transforms.Normalize(mean=[0.0, 0.0, 0.0], std=1 / std),
-            transforms.Normalize(mean=-mean, std=[1.0, 1.0, 1.0]),
-        ]
-    )
+#     # Undo the normalization (for visualization purposes)
+#     mean, std = compute_mean_and_std()
+#     invTrans = transforms.Compose(
+#         [
+#             transforms.Normalize(mean=[0.0, 0.0, 0.0], std=1 / std),
+#             transforms.Normalize(mean=-mean, std=[1.0, 1.0, 1.0]),
+#         ]
+#     )
 
-    images = invTrans(images)
+#     images = invTrans(images)
 
-    # YOUR CODE HERE:
-    # Get class names from the train data loader
-    class_names  = # YOUR CODE HERE
+#     # YOUR CODE HERE:
+#     # Get class names from the train data loader
+#     class_names  = # YOUR CODE HERE
 
-    # Convert from BGR (the format used by pytorch) to
-    # RGB (the format expected by matplotlib)
-    images = torch.permute(images, (0, 2, 3, 1)).clip(0, 1)
+#     # Convert from BGR (the format used by pytorch) to
+#     # RGB (the format expected by matplotlib)
+#     images = torch.permute(images, (0, 2, 3, 1)).clip(0, 1)
 
-    # plot the images in the batch, along with the corresponding labels
-    fig = plt.figure(figsize=(25, 4))
-    for idx in range(max_n):
-        ax = fig.add_subplot(1, max_n, idx + 1, xticks=[], yticks=[])
-        ax.imshow(images[idx])
-        # print out the correct label for each image
-        # .item() gets the value contained in a Tensor
-        ax.set_title(class_names[labels[idx].item()])
+#     # plot the images in the batch, along with the corresponding labels
+#     fig = plt.figure(figsize=(25, 4))
+#     for idx in range(max_n):
+#         ax = fig.add_subplot(1, max_n, idx + 1, xticks=[], yticks=[])
+#         ax.imshow(images[idx])
+#         # print out the correct label for each image
+#         # .item() gets the value contained in a Tensor
+#         ax.set_title(class_names[labels[idx].item()])
 
 
 ######################################################################################
