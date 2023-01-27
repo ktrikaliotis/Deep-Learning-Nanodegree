@@ -148,50 +148,50 @@ def get_data_loaders(
     return data_loaders
 
 
-# def visualize_one_batch(data_loaders, max_n: int = 5):
-#     """
-#     Visualize one batch of data.
+def visualize_one_batch(data_loaders, max_n: int = 5):
+    """
+    Visualize one batch of data.
 
-#     :param data_loaders: dictionary containing data loaders
-#     :param max_n: maximum number of images to show
-#     :return: None
-#     """
+    :param data_loaders: dictionary containing data loaders
+    :param max_n: maximum number of images to show
+    :return: None
+    """
 
-#     # YOUR CODE HERE:
-#     # obtain one batch of training images
-#     # First obtain an iterator from the train dataloader
-#     dataiter  = # YOUR CODE HERE
-#     # Then call the .next() method on the iterator you just
-#     # obtained
-#     images, labels  = # YOUR CODE HERE
+    # YOUR CODE HERE:
+    # obtain one batch of training images
+    # First obtain an iterator from the train dataloader
+    dataiter  = iter(data_loaders['train']) # YOUR CODE HERE
+    # Then call the .next() method on the iterator you just
+    # obtained
+    images, labels  = dataiter.next()# YOUR CODE HERE
 
-#     # Undo the normalization (for visualization purposes)
-#     mean, std = compute_mean_and_std()
-#     invTrans = transforms.Compose(
-#         [
-#             transforms.Normalize(mean=[0.0, 0.0, 0.0], std=1 / std),
-#             transforms.Normalize(mean=-mean, std=[1.0, 1.0, 1.0]),
-#         ]
-#     )
+    # Undo the normalization (for visualization purposes)
+    mean, std = compute_mean_and_std()
+    invTrans = transforms.Compose(
+        [
+            transforms.Normalize(mean=[0.0, 0.0, 0.0], std=1 / std),
+            transforms.Normalize(mean=-mean, std=[1.0, 1.0, 1.0]),
+        ]
+    )
 
-#     images = invTrans(images)
+    images = invTrans(images)
 
-#     # YOUR CODE HERE:
-#     # Get class names from the train data loader
-#     class_names  = # YOUR CODE HERE
+    # YOUR CODE HERE:
+    # Get class names from the train data loader
+    class_names  = [class_.split(".")[1].replace("_", " ") for class_ in data_loaders['train'].dataset.classes]# YOUR CODE HERE
 
-#     # Convert from BGR (the format used by pytorch) to
-#     # RGB (the format expected by matplotlib)
-#     images = torch.permute(images, (0, 2, 3, 1)).clip(0, 1)
+    # Convert from BGR (the format used by pytorch) to
+    # RGB (the format expected by matplotlib)
+    images = torch.permute(images, (0, 2, 3, 1)).clip(0, 1)
 
-#     # plot the images in the batch, along with the corresponding labels
-#     fig = plt.figure(figsize=(25, 4))
-#     for idx in range(max_n):
-#         ax = fig.add_subplot(1, max_n, idx + 1, xticks=[], yticks=[])
-#         ax.imshow(images[idx])
-#         # print out the correct label for each image
-#         # .item() gets the value contained in a Tensor
-#         ax.set_title(class_names[labels[idx].item()])
+    # plot the images in the batch, along with the corresponding labels
+    fig = plt.figure(figsize=(25, 4))
+    for idx in range(max_n):
+        ax = fig.add_subplot(1, max_n, idx + 1, xticks=[], yticks=[])
+        ax.imshow(images[idx])
+        # print out the correct label for each image
+        # .item() gets the value contained in a Tensor
+        ax.set_title(class_names[labels[idx].item()])
 
 
 ######################################################################################
