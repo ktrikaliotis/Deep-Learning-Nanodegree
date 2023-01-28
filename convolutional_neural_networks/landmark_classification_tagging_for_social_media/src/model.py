@@ -15,20 +15,32 @@ class MyModel(nn.Module):
 
         self.model = nn.Sequential(
             # first conv+maxpool+relu
-            nn.Conv2d(3, 16, 3, padding=1),
+            nn.Conv2d(3, 32, 3, padding=1),
             nn.LeakyReLU(),
             nn.MaxPool2d(2, 2),
             
             # second conv+maxpool+relu
-            nn.Conv2d(16, 32, 3, padding=1),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(2, 2),
-            nn.BatchNorm2d(32),
-            
-            # third conv+maxpool+relu
             nn.Conv2d(32, 64, 3, padding=1),
             nn.LeakyReLU(),
             nn.MaxPool2d(2, 2),
+            nn.BatchNorm2d(64),
+            
+            # third conv+maxpool+relu
+            nn.Conv2d(64, 128, 3, padding=1),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(2, 2),
+            
+            # fourth conv+maxpool+relu
+            nn.Conv2d(128, 256, 3, padding=1),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(2, 2),  
+            nn.BatchNorm2d(256),
+            
+            # fifth conv+maxpool+relu
+            nn.Conv2d(256, 512, 3, padding=1),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(2, 2),  
+            nn.BatchNorm2d(512),    
             
             # flatten feature maps
             nn.Flatten(),
@@ -36,11 +48,13 @@ class MyModel(nn.Module):
             nn.Dropout(dropout),
             
             # fully connected layers
-            nn.Linear(28 * 28 * 64, 256),
-            nn.LeakyReLU(negative_slope=0.2),
-            nn.BatchNorm1d(256),
+            nn.Linear(7 * 7 * 512, 2048),
+            nn.Linear(2048, 1024),
+            nn.BatchNorm1d(1024),
             nn.Dropout(dropout),
-            nn.Linear(256, num_classes),
+            nn.Linear(1024, num_classes),
+            nn.LeakyReLU(negative_slope=0.2),
+
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
